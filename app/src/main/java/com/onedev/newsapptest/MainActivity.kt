@@ -17,8 +17,6 @@ class MainActivity : ComponentActivity() {
             NewsAppTestTheme {
                 HomeScreen(
                     userName = "One",
-                    onSeeMoreClick = { section -> println("See more: $section") },
-                    onItemClick = { section, index -> println("Clicked $section item $index") }
                 )
             }
         }

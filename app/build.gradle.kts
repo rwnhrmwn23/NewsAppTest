@@ -76,4 +76,13 @@ dependencies {
 
     // Navigation
     implementation(libs.navigation.compose)
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp.logging)
+
+    // Coil
+    implementation(libs.coil.compose)
+
 }
