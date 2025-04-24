@@ -3,6 +3,7 @@ package com.onedev.newsapptest.presentation.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,96 +38,109 @@ fun HomeScreen(
     onClick: (News, String) -> Unit?,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val articles = viewModel.news
+    val articles = viewModel.articles
     val isLoadingArticle = viewModel.isLoadingArticle
     val blogs = viewModel.blogs
     val isLoadingBlog = viewModel.isLoadingBlog
     val reports = viewModel.reports
     val isLoadingReport = viewModel.isLoadingReport
+    val errorMessage = viewModel.errorMessage
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(16.dp)
-    ) {
+    if (errorMessage != null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                text = errorMessage,
+                color = Color.Gray,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+
+    else {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(16.dp)
         ) {
-            Text(
-                text = greeting,
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Text(
-                text = userName,
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-
-        SectionRow(title = "Article", onSeeMore = {
-            navController.navigate(Screen.ArticleList.createRoute("Article"))
-        })
-
-        if (isLoadingArticle) {
-            CircularProgressIndicator(
+            Column(
                 modifier = Modifier
-                    .size(48.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-        } else {
-            Spacer(modifier = Modifier.height(16.dp))
-            LazyRow {
-                items(articles) { article ->
-                    NewsItem(news = article, onClick = {
-                        onClick(article, "Article")
-                    })
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = greeting,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Text(
+                    text = userName,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+
+            SectionRow(title = "Article", onSeeMore = {
+                navController.navigate(Screen.ArticleList.createRoute("Article"))
+            })
+
+            if (isLoadingArticle) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            } else {
+                Spacer(modifier = Modifier.height(16.dp))
+                LazyRow {
+                    items(articles) { article ->
+                        NewsItem(news = article, onClick = {
+                            onClick(article, "Article")
+                        })
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        SectionRow(title = "Blog", onSeeMore = {
-            navController.navigate(Screen.ArticleList.createRoute("Blog"))
-        })
-
-        if (isLoadingBlog) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .size(48.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-        } else {
             Spacer(modifier = Modifier.height(16.dp))
-            LazyRow {
-                items(blogs) { blogs ->
-                    NewsItem(news = blogs, onClick = {
-                        onClick(blogs, "Blog")
-                    })
+            SectionRow(title = "Blog", onSeeMore = {
+                navController.navigate(Screen.ArticleList.createRoute("Blog"))
+            })
+
+            if (isLoadingBlog) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            } else {
+                Spacer(modifier = Modifier.height(16.dp))
+                LazyRow {
+                    items(blogs) { blogs ->
+                        NewsItem(news = blogs, onClick = {
+                            onClick(blogs, "Blog")
+                        })
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        SectionRow(title = "Report", onSeeMore = {
-            navController.navigate(Screen.ArticleList.createRoute("Report"))
-        })
-
-        if (isLoadingReport) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .size(48.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-        } else {
             Spacer(modifier = Modifier.height(16.dp))
-            LazyRow {
-                items(reports) { report ->
-                    NewsItem(news = report, onClick = {
-                        onClick(report, "Report")
-                    })
+            SectionRow(title = "Report", onSeeMore = {
+                navController.navigate(Screen.ArticleList.createRoute("Report"))
+            })
+
+            if (isLoadingReport) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            } else {
+                Spacer(modifier = Modifier.height(16.dp))
+                LazyRow {
+                    items(reports) { report ->
+                        NewsItem(news = report, onClick = {
+                            onClick(report, "Report")
+                        })
+                    }
                 }
             }
         }

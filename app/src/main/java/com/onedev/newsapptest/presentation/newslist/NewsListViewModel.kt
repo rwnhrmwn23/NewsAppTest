@@ -10,6 +10,7 @@ import com.onedev.newsapptest.domain.usecase.GetArticleUseCase
 import com.onedev.newsapptest.domain.usecase.GetBlogUseCase
 import com.onedev.newsapptest.domain.usecase.GetNewsSiteUseCase
 import com.onedev.newsapptest.domain.usecase.GetReportUseCase
+import com.onedev.newsapptest.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -46,51 +47,111 @@ class ArticleListViewModel @Inject constructor(
     var newsSites by mutableStateOf<List<String>>(emptyList())
         private set
 
-
-    init {
-        loadNews()
-    }
+    var errorMessage by mutableStateOf<String?>(null)
+        private set
 
     private var lastQuery: String? = null
 
+    init {
+        loadNews()
+        loadNewsSites()
+    }
+
     fun loadNews(search: String? = null, newsSite: String? = null) {
-        when (typeNews) {
-            "Article" -> {
-                lastQuery = search
+        lastQuery = search
+        isLoading = true
 
-                viewModelScope.launch {
-                    isLoading = true
-                    article = getArticlesUseCase(search, newsSite)
-                    isLoading = false
+        viewModelScope.launch {
+            when (typeNews) {
+                "Article" -> {
+                    getArticlesUseCase.invoke(search, newsSite).collect { result ->
+                        when (result) {
+                            is Resource.Success -> {
+                                article = result.data
+                                errorMessage = null
+                            }
+
+                            is Resource.Error -> {
+                                isLoading = false
+                                errorMessage = result.message
+                            }
+
+                            is Resource.Loading -> {
+                                isLoading = true
+                            }
+                        }
+                    }
                 }
 
-            }
-            "Blog" -> {
-                lastQuery = search
+                "Blog" -> {
+                    getBlogUseCase.invoke(search, newsSite).collect { result ->
+                        when (result) {
+                            is Resource.Success -> {
+                                blogs = result.data
+                                errorMessage = null
+                            }
 
-                viewModelScope.launch {
-                    isLoading = true
-                    blogs = getBlogUseCase(search, newsSite)
-                    isLoading = false
+                            is Resource.Error -> {
+                                isLoading = false
+                                errorMessage = result.message
+                            }
+
+                            is Resource.Loading -> {
+                                isLoading = true
+                            }
+                        }
+                    }
                 }
 
-            }
-            else -> {
-                lastQuery = search
+                else -> {
+                    getReportUseCase.invoke(search, newsSite).collect { result ->
+                        when (result) {
+                            is Resource.Success -> {
+                                reports = result.data
+                                errorMessage = null
+                            }
 
-                viewModelScope.launch {
-                    isLoading = true
-                    reports = getReportUseCase(search, newsSite)
-                    isLoading = false
+                            is Resource.Error -> {
+                                isLoading = false
+                                errorMessage = result.message
+                            }
+
+                            is Resource.Loading -> {
+                                isLoading = true
+                            }
+                        }
+                    }
                 }
-
             }
+
+            isLoading = false
         }
     }
 
     fun loadNewsSites() {
         viewModelScope.launch {
-            newsSites = getNewsSiteUseCase()
+            getNewsSiteUseCase.invoke().collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        newsSites = result.data.newsSites
+                        errorMessage = null
+                    }
+
+                    is Resource.Error -> {
+                        isLoading = false
+                        errorMessage = result.message
+                    }
+
+                    is Resource.Loading -> {
+                        isLoading = true
+                    }
+                }
+            }
         }
     }
+
+    fun clearError() {
+        errorMessage = null
+    }
 }
+

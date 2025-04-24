@@ -102,7 +102,6 @@ fun NewsListScreen(
                 )
             )
             IconButton(onClick = {
-                viewModel.loadNewsSites()
                 showFilter.value = true
             }) {
                 Icon(Icons.Default.FilterList, contentDescription = "Filter")
@@ -228,7 +227,7 @@ fun EmptyStateMessage(type: String) {
     var showMessage by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(200)
+        kotlinx.coroutines.delay(300)
         showMessage = true
     }
 
