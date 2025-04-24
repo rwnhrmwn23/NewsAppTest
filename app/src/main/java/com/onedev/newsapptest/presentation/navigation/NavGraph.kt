@@ -8,7 +8,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.onedev.newsapptest.domain.model.Article
+import com.onedev.newsapptest.domain.model.News
 import com.onedev.newsapptest.presentation.detail.DetailScreen
 import com.onedev.newsapptest.presentation.home.HomeScreen
 import com.onedev.newsapptest.presentation.newslist.ArticleListViewModel
@@ -23,16 +23,24 @@ fun AppNavGraph(navController: NavHostController) {
                 greeting = getGreeting(),
                 userName = "One",
                 navController = navController,
-                onArticleClick = { article ->
-                    navController.currentBackStackEntry?.savedStateHandle?.set("article", article)
+                onClick = { news: News, type: String ->
+                    navController.currentBackStackEntry?.savedStateHandle?.set("type", type)
+                    navController.currentBackStackEntry?.savedStateHandle?.set("news", news)
                     navController.navigate(Screen.Detail.route)
-                }
+                },
             )
         }
 
         composable(route = Screen.Detail.route) {
-            val article = navController.previousBackStackEntry?.savedStateHandle?.get<Article>("article")
-            article?.let { DetailScreen(it, onBackClick = { navController.popBackStack() }) }
+            val type = navController.previousBackStackEntry?.savedStateHandle?.get<String>("type")
+            val news = navController.previousBackStackEntry?.savedStateHandle?.get<News>("news")
+            news?.let { data ->
+                DetailScreen(
+                    news = data,
+                    type = type ?: "Article",
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
         }
 
         composable(
@@ -43,16 +51,14 @@ fun AppNavGraph(navController: NavHostController) {
             val viewModel: ArticleListViewModel = hiltViewModel()
 
             LaunchedEffect(true) {
-                if (viewModel.articles.isEmpty()) {
-                    viewModel.loadArticles()
-                }
+                viewModel.loadNews()
             }
 
             NewsListScreen(
                 title = category,
                 viewModel = viewModel,
-                onClick = { article ->
-                    navController.currentBackStackEntry?.savedStateHandle?.set("article", article)
+                onClickNews = { news ->
+                    navController.currentBackStackEntry?.savedStateHandle?.set("news", news)
                     navController.navigate(Screen.Detail.route)
                 },
                 onFilterClick = { /* TODO */ },

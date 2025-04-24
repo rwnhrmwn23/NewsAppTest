@@ -6,33 +6,53 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import com.onedev.newsapptest.domain.model.Article
+import com.onedev.newsapptest.domain.model.News
 import com.onedev.newsapptest.domain.usecase.GetArticleUseCase
+import com.onedev.newsapptest.domain.usecase.GetBlogUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getArticlesUseCase: GetArticleUseCase
+    private val getArticlesUseCase: GetArticleUseCase,
+    private val getBlogUseCase: GetBlogUseCase,
 ) : ViewModel() {
 
-    var articles by mutableStateOf<List<Article>>(emptyList())
+    var news by mutableStateOf<List<News>>(emptyList())
         private set
 
-    var isLoading by mutableStateOf(true)
+    var isLoadingArticle by mutableStateOf(true)
+        private set
+
+    var blogs by mutableStateOf<List<News>>(emptyList())
+        private set
+
+    var isLoadingBlog by mutableStateOf(true)
         private set
 
     init {
         loadArticles()
+        loadBlogs()
     }
 
     private fun loadArticles(search: String? = null) {
         viewModelScope.launch {
             try {
-                isLoading = true
-                articles = getArticlesUseCase(search = search)
+                isLoadingArticle = true
+                news = getArticlesUseCase(search = search)
             } finally {
-                isLoading = false
+                isLoadingArticle = false
+            }
+        }
+    }
+
+    private fun loadBlogs(search: String? = null) {
+        viewModelScope.launch {
+            try {
+                isLoadingBlog = true
+                blogs = getBlogUseCase(search = search)
+            } finally {
+                isLoadingBlog = false
             }
         }
     }

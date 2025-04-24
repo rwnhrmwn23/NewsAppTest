@@ -1,9 +1,10 @@
 package com.onedev.newsapptest.data.di
 
 import com.onedev.newsapptest.data.remote.api.NewsApi
-import com.onedev.newsapptest.data.repository.ArticleRepositoryImpl
-import com.onedev.newsapptest.domain.repository.ArticleRepository
+import com.onedev.newsapptest.data.repository.NewsRepositoryImpl
+import com.onedev.newsapptest.domain.repository.NewsRepository
 import com.onedev.newsapptest.domain.usecase.GetArticleUseCase
+import com.onedev.newsapptest.domain.usecase.GetBlogUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -41,13 +42,19 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideArticleRepository(api: NewsApi): ArticleRepository {
-        return ArticleRepositoryImpl(api)
+    fun provideArticleRepository(api: NewsApi): NewsRepository {
+        return NewsRepositoryImpl(api)
     }
 
     @Provides
     @Singleton
-    fun provideGetArticlesUseCase(repository: ArticleRepository): GetArticleUseCase {
+    fun provideGetArticlesUseCase(repository: NewsRepository): GetArticleUseCase {
         return GetArticleUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetBlogsUseCase(repository: NewsRepository): GetBlogUseCase {
+        return GetBlogUseCase(repository)
     }
 }

@@ -23,21 +23,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.onedev.newsapptest.domain.model.Article
+import com.onedev.newsapptest.domain.model.News
 import com.onedev.newsapptest.utils.extractSummary
 import com.onedev.newsapptest.utils.toFormattedDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
-    article: Article,
+    news: News,
+    type: String,
     onBackClick: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Box {
             AsyncImage(
-                model = article.imageUrl,
-                contentDescription = article.title,
+                model = news.imageUrl,
+                contentDescription = news.title,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp),
@@ -45,7 +46,7 @@ fun DetailScreen(
             )
 
             TopAppBar(
-                title = { Text("Detail Article") },
+                title = { Text("Detail $type") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -62,21 +63,21 @@ fun DetailScreen(
 
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = article.title,
+                text = news.title,
                 style = MaterialTheme.typography.headlineSmall
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Published at: ${article.publishedAt.toFormattedDate()}",
+                text = "Published at: ${news.publishedAt.toFormattedDate()}",
                 style = MaterialTheme.typography.bodySmall
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = article.summary.extractSummary(),
+                text = news.summary.extractSummary(),
                 style = MaterialTheme.typography.bodyMedium
             )
         }

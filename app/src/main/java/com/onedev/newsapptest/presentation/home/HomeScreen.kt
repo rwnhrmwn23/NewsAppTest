@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.onedev.newsapptest.domain.model.Article
+import com.onedev.newsapptest.domain.model.News
 import com.onedev.newsapptest.presentation.navigation.Screen
 
 @Composable
@@ -33,11 +34,13 @@ fun HomeScreen(
     greeting: String,
     userName: String,
     navController: NavHostController,
-    onArticleClick: (Article) -> Unit,
+    onClick: (News, String) -> Unit?,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val articles = viewModel.articles
-    val isLoading = viewModel.isLoading
+    val articles = viewModel.news
+    val isLoadingArticle = viewModel.isLoadingArticle
+    val blogs = viewModel.blogs
+    val isLoadingBlog = viewModel.isLoadingBlog
 
     Column(
         modifier = Modifier
@@ -65,17 +68,40 @@ fun HomeScreen(
             navController.navigate(Screen.ArticleList.createRoute("Article"))
         })
 
-        if (isLoading) {
+        if (isLoadingArticle) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .size(48.dp)
                     .align(Alignment.CenterHorizontally)
             )
         } else {
+            Spacer(modifier = Modifier.height(16.dp))
             LazyRow {
                 items(articles) { article ->
-                    ArticleItem(article = article, onClick = {
-                        onArticleClick(article)
+                    NewsItem(news = article, onClick = {
+                        onClick(article, "Article")
+                    })
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        SectionRow(title = "Blog", onSeeMore = {
+            navController.navigate(Screen.ArticleList.createRoute("Blog"))
+        })
+
+        if (isLoadingBlog) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(48.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+        } else {
+            Spacer(modifier = Modifier.height(16.dp))
+            LazyRow {
+                items(blogs) { blogs ->
+                    NewsItem(news = blogs, onClick = {
+                        onClick(blogs, "Blog")
                     })
                 }
             }
@@ -99,7 +125,7 @@ fun SectionRow(title: String, onSeeMore: () -> Unit) {
 }
 
 @Composable
-fun ArticleItem(article: Article, onClick: () -> Unit) {
+fun NewsItem(news: News, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .padding(end = 8.dp)
@@ -108,7 +134,7 @@ fun ArticleItem(article: Article, onClick: () -> Unit) {
     ) {
         Column {
             AsyncImage(
-                model = article.imageUrl,
+                model = news.imageUrl,
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -116,7 +142,7 @@ fun ArticleItem(article: Article, onClick: () -> Unit) {
                 contentScale = ContentScale.Crop
             )
             Text(
-                text = article.title,
+                text = news.title,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(4.dp),
                 maxLines = 2

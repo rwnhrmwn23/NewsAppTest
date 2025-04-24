@@ -37,7 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.onedev.newsapptest.domain.model.Article
+import com.onedev.newsapptest.domain.model.News
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -48,13 +48,16 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 fun NewsListScreen(
     title: String,
     viewModel: ArticleListViewModel,
-    onClick: (Article) -> Unit,
+    onClickNews: (News) -> Unit,
     onSortClick: () -> Unit,
     onFilterClick: () -> Unit
 ) {
     val search by remember { derivedStateOf { viewModel.searchText } }
-    val articles by remember { derivedStateOf { viewModel.articles } }
+    val articles by remember { derivedStateOf { viewModel.article } }
+    val blogs by remember { derivedStateOf { viewModel.blogs } }
     val isLoading by remember { derivedStateOf { viewModel.isLoading } }
+
+    viewModel.typeNews = title
 
     Column(
         modifier = Modifier
@@ -105,9 +108,17 @@ fun NewsListScreen(
                     .align(Alignment.CenterHorizontally)
             )
         } else {
-            LazyColumn {
-                items(articles) { article ->
-                    ArticleListItem(article = article, onClick = { onClick(article) })
+            if (viewModel.typeNews == "Article") {
+                LazyColumn {
+                    items(articles) { article ->
+                        NewsListItem(news = article, onClick = { onClickNews(article) })
+                    }
+                }
+            } else {
+                LazyColumn {
+                    items(blogs) { blog ->
+                        NewsListItem(news = blog, onClick = { onClickNews(blog) })
+                    }
                 }
             }
         }
@@ -118,8 +129,14 @@ fun NewsListScreen(
             .debounce(800)
             .distinctUntilChanged()
             .collectLatest { query ->
-                if (viewModel.articles.isEmpty() || query.isNotEmpty()) {
-                    viewModel.loadArticles(search = query)
+                if (viewModel.typeNews == "Article") {
+                    if (viewModel.article.isEmpty() || query.isNotEmpty()) {
+                        viewModel.loadNews(search = query)
+                    }
+                } else {
+                    if (viewModel.blogs.isEmpty() || query.isNotEmpty()) {
+                        viewModel.loadNews(search = query)
+                    }
                 }
             }
     }
@@ -127,7 +144,7 @@ fun NewsListScreen(
 
 
 @Composable
-fun ArticleListItem(article: Article, onClick: () -> Unit) {
+fun NewsListItem(news: News, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -137,7 +154,7 @@ fun ArticleListItem(article: Article, onClick: () -> Unit) {
         Column {
 
             AsyncImage(
-                model = article.imageUrl,
+                model = news.imageUrl,
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -147,7 +164,7 @@ fun ArticleListItem(article: Article, onClick: () -> Unit) {
 
             Text(
                 modifier = Modifier.padding(16.dp),
-                text = article.title,
+                text = news.title,
                 style = MaterialTheme.typography.titleMedium
             )
 
@@ -159,10 +176,10 @@ fun ArticleListItem(article: Article, onClick: () -> Unit) {
             ) {
                 Column {
                     Text("Launches", style = MaterialTheme.typography.bodySmall)
-                    if (article.launches.isEmpty()) {
+                    if (news.launches.isEmpty()) {
                         Text("-", style = MaterialTheme.typography.bodySmall)
                     } else {
-                        article.launches.forEach {
+                        news.launches.forEach {
                             OutlinedButton(onClick = {}) {
                                 Text(it.provider)
                             }
@@ -171,10 +188,10 @@ fun ArticleListItem(article: Article, onClick: () -> Unit) {
                 }
                 Column {
                     Text("Event", style = MaterialTheme.typography.bodySmall)
-                    if (article.events.isEmpty()) {
+                    if (news.events.isEmpty()) {
                         Text("-", style = MaterialTheme.typography.bodySmall)
                     } else {
-                        article.events.forEach {
+                        news.events.forEach {
                             OutlinedButton(onClick = {}) {
                                 Text(it.provider)
                             }
@@ -185,4 +202,3 @@ fun ArticleListItem(article: Article, onClick: () -> Unit) {
         }
     }
 }
-
