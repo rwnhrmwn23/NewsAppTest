@@ -7,14 +7,16 @@ import com.onedev.newsapptest.domain.repository.ArticleRepository
 class ArticleRepositoryImpl(
     private val api: NewsApi
 ) : ArticleRepository {
-    override suspend fun getArticles(): List<Article> {
-        return api.getArticles().results.map {
+    override suspend fun getArticles(search: String?): List<Article> {
+        return api.getArticles(search = search).results.map {
             Article(
                 id = it.id,
                 title = it.title,
                 imageUrl = it.imageUrl,
                 summary = it.summary,
-                publishedAt = it.publishedAt
+                publishedAt = it.publishedAt,
+                launches = it.launches.map { l -> Article.Launch(l.launchId, l.provider) },
+                events = it.events.map { e -> Article.Event(e.eventId, e.provider) }
             )
         }
     }

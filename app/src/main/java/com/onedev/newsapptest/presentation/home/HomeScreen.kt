@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,16 +21,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.onedev.newsapptest.domain.model.Article
+import com.onedev.newsapptest.presentation.navigation.Screen
 
 @Composable
 fun HomeScreen(
     greeting: String,
     userName: String,
+    navController: NavHostController,
     onArticleClick: (Article) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -58,9 +61,16 @@ fun HomeScreen(
             )
         }
 
-        SectionRow(title = "Article", onSeeMore = {})
+        SectionRow(title = "Article", onSeeMore = {
+            navController.navigate(Screen.ArticleList.createRoute("Article"))
+        })
+
         if (isLoading) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(48.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
         } else {
             LazyRow {
                 items(articles) { article ->
@@ -75,7 +85,7 @@ fun HomeScreen(
 
 @Composable
 fun SectionRow(title: String, onSeeMore: () -> Unit) {
-    androidx.compose.foundation.layout.Row(
+    Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

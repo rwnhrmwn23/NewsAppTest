@@ -86,4 +86,7 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
+    // Icons
+    implementation(libs.material.icons.extended)
+
 }

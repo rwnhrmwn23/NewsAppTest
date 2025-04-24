@@ -1,18 +1,18 @@
-package com.onedev.newsapptest.presentation.home
+package com.onedev.newsapptest.presentation.newslist
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
 import com.onedev.newsapptest.domain.model.Article
 import com.onedev.newsapptest.domain.usecase.GetArticleUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class ArticleListViewModel @Inject constructor(
     private val getArticlesUseCase: GetArticleUseCase
 ) : ViewModel() {
 
@@ -22,18 +22,28 @@ class HomeViewModel @Inject constructor(
     var isLoading by mutableStateOf(true)
         private set
 
+    var searchText by mutableStateOf("")
+        private set
+
+    fun onSearchTextChange(newText: String) {
+        searchText = newText
+    }
+
+
     init {
         loadArticles()
     }
 
-    private fun loadArticles(search: String? = null) {
+    private var lastQuery: String? = null
+
+    fun loadArticles(search: String? = null) {
+        if (search == lastQuery && articles.isNotEmpty()) return
+        lastQuery = search
+
         viewModelScope.launch {
-            try {
-                isLoading = true
-                articles = getArticlesUseCase(search = search)
-            } finally {
-                isLoading = false
-            }
+            isLoading = true
+            articles = getArticlesUseCase(search)
+            isLoading = false
         }
     }
 }
