@@ -61,7 +61,6 @@ fun AppNavGraph(navController: NavHostController) {
                     navController.currentBackStackEntry?.savedStateHandle?.set("news", news)
                     navController.navigate(Screen.Detail.route)
                 },
-                onFilterClick = { /* TODO */ },
                 onSortClick = { /* TODO */ }
             )
         }

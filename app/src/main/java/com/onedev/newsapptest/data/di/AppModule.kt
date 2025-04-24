@@ -5,6 +5,7 @@ import com.onedev.newsapptest.data.repository.NewsRepositoryImpl
 import com.onedev.newsapptest.domain.repository.NewsRepository
 import com.onedev.newsapptest.domain.usecase.GetArticleUseCase
 import com.onedev.newsapptest.domain.usecase.GetBlogUseCase
+import com.onedev.newsapptest.domain.usecase.GetNewsSiteUseCase
 import com.onedev.newsapptest.domain.usecase.GetReportUseCase
 import dagger.Module
 import dagger.Provides
@@ -63,5 +64,11 @@ object AppModule {
     @Singleton
     fun provideGetReportsUseCase(repository: NewsRepository): GetReportUseCase {
         return GetReportUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetNewsSiteUseCase(repository: NewsRepository): GetNewsSiteUseCase {
+        return GetNewsSiteUseCase(repository)
     }
 }

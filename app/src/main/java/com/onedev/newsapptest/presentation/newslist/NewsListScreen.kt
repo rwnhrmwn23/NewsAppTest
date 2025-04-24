@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,9 +21,11 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -30,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -51,13 +56,13 @@ fun NewsListScreen(
     viewModel: ArticleListViewModel,
     onClickNews: (News) -> Unit,
     onSortClick: () -> Unit,
-    onFilterClick: () -> Unit
 ) {
     val search by remember { derivedStateOf { viewModel.searchText } }
     val articles by remember { derivedStateOf { viewModel.article } }
     val blogs by remember { derivedStateOf { viewModel.blogs } }
     val reports by remember { derivedStateOf { viewModel.reports } }
     val isLoading by remember { derivedStateOf { viewModel.isLoading } }
+    val showFilter = remember { mutableStateOf(false) }
 
     viewModel.typeNews = title
 
@@ -95,7 +100,10 @@ fun NewsListScreen(
                     unfocusedContainerColor = Color(0xFFF5F5F5)
                 )
             )
-            IconButton(onClick = onFilterClick) {
+            IconButton(onClick = {
+                viewModel.loadNewsSites()
+                showFilter.value = true
+            }) {
                 Icon(Icons.Default.FilterList, contentDescription = "Filter")
             }
             IconButton(onClick = onSortClick) {
@@ -103,59 +111,60 @@ fun NewsListScreen(
             }
         }
 
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(48.dp),
-                    color = MaterialTheme.colorScheme.primary
-                )
+        when {
+            isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                }
             }
-        } else {
-            when (viewModel.typeNews) {
-                "Article" -> {
-                    if (articles.isEmpty()) {
-                        EmptyStateMessage(viewModel.typeNews)
-                    } else {
-                        LazyColumn {
-                            items(articles) { article ->
-                                NewsListItem(news = article, onClick = { onClickNews(article) })
-                            }
-                        }
-                    }
-                }
 
-                "Blog" -> {
-                    if (blogs.isEmpty()) {
-                        EmptyStateMessage(viewModel.typeNews)
-                    } else {
-                        LazyColumn {
-                            items(blogs) { blog ->
-                                NewsListItem(news = blog, onClick = { onClickNews(blog) })
-                            }
-                        }
-                    }
-                }
+            articles.isEmpty() && viewModel.typeNews == "Article" -> {
+                EmptyStateMessage("Article")
+            }
 
-                else -> {
-                    if (reports.isEmpty()) {
-                        EmptyStateMessage(viewModel.typeNews)
-                    } else {
-                        LazyColumn {
-                            items(reports) { report ->
-                                NewsListItem(news = report, onClick = { onClickNews(report) })
-                            }
-                        }
+            blogs.isEmpty() && viewModel.typeNews == "Blog" -> {
+                EmptyStateMessage("Blog")
+            }
+
+            reports.isEmpty() && viewModel.typeNews == "Report" -> {
+                EmptyStateMessage("Report")
+            }
+
+            else -> {
+                LazyColumn {
+                    val data = when (viewModel.typeNews) {
+                        "Article" -> articles
+                        "Blog" -> blogs
+                        else -> reports
+                    }
+
+                    items(data) { news ->
+                        NewsListItem(news = news, onClick = { onClickNews(news) })
                     }
                 }
             }
         }
+
+        if (showFilter.value) {
+            NewsSiteFilterSheet(
+                newsSites = viewModel.newsSites,
+                onSelect = {
+                    viewModel.loadNews(
+                        search = viewModel.searchText, newsSite = it
+                    )
+                    showFilter.value = false
+                },
+                onDismiss = {
+                    showFilter.value = false
+                }
+            )
+        }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel.typeNews) {
         snapshotFlow { viewModel.searchText }
             .debounce(800)
             .distinctUntilChanged()
@@ -182,6 +191,36 @@ fun NewsListScreen(
             }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NewsSiteFilterSheet(
+    newsSites: List<String>,
+    onSelect: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Filter by News Site", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+
+            LazyColumn(modifier = Modifier.fillMaxHeight()) {
+                items(newsSites) { site ->
+                    Text(
+                        text = site,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(site) }
+                            .padding(vertical = 12.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun EmptyStateMessage(type: String) {

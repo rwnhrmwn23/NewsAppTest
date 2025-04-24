@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.onedev.newsapptest.domain.model.News
 import com.onedev.newsapptest.domain.usecase.GetArticleUseCase
 import com.onedev.newsapptest.domain.usecase.GetBlogUseCase
+import com.onedev.newsapptest.domain.usecase.GetNewsSiteUseCase
 import com.onedev.newsapptest.domain.usecase.GetReportUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -17,7 +18,8 @@ import javax.inject.Inject
 class ArticleListViewModel @Inject constructor(
     private val getArticlesUseCase: GetArticleUseCase,
     private val getBlogUseCase: GetBlogUseCase,
-    private val getReportUseCase: GetReportUseCase
+    private val getReportUseCase: GetReportUseCase,
+    private val getNewsSiteUseCase: GetNewsSiteUseCase,
 ) : ViewModel() {
 
     var article by mutableStateOf<List<News>>(emptyList())
@@ -41,44 +43,54 @@ class ArticleListViewModel @Inject constructor(
 
     var typeNews by mutableStateOf("")
 
+    var newsSites by mutableStateOf<List<String>>(emptyList())
+        private set
+
+
     init {
         loadNews()
     }
 
     private var lastQuery: String? = null
 
-    fun loadNews(search: String? = null) {
+    fun loadNews(search: String? = null, newsSite: String? = null) {
         when (typeNews) {
             "Article" -> {
-                if (search == lastQuery && article.isNotEmpty()) return
                 lastQuery = search
 
                 viewModelScope.launch {
                     isLoading = true
-                    article = getArticlesUseCase(search)
+                    article = getArticlesUseCase(search, newsSite)
                     isLoading = false
                 }
+
             }
             "Blog" -> {
-                if (search == lastQuery && blogs.isNotEmpty()) return
                 lastQuery = search
 
                 viewModelScope.launch {
                     isLoading = true
-                    blogs = getBlogUseCase(search)
+                    blogs = getBlogUseCase(search, newsSite)
                     isLoading = false
                 }
+
             }
             else -> {
-                if (search == lastQuery && reports.isNotEmpty()) return
                 lastQuery = search
 
                 viewModelScope.launch {
                     isLoading = true
-                    reports = getReportUseCase(search)
+                    reports = getReportUseCase(search, newsSite)
                     isLoading = false
                 }
+
             }
+        }
+    }
+
+    fun loadNewsSites() {
+        viewModelScope.launch {
+            newsSites = getNewsSiteUseCase()
         }
     }
 }

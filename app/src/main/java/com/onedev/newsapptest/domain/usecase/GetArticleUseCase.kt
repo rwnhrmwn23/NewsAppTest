@@ -4,6 +4,6 @@ import com.onedev.newsapptest.domain.model.News
 import com.onedev.newsapptest.domain.repository.NewsRepository
 
 class GetArticleUseCase(private val repository: NewsRepository) {
-    suspend operator fun invoke(search: String? = null):
-            List<News> = repository.getArticles(search = search)
+    suspend operator fun invoke(search: String? = null, newsSite: String? = null):
+            List<News> = repository.getArticles(search = search, newsSite = newsSite)
 }
