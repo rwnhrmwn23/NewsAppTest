@@ -70,23 +70,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    // Hilt
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     kapt(libs.hilt.compiler)
-
-    // Navigation
     implementation(libs.navigation.compose)
-
-    // Retrofit
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
     implementation(libs.okhttp.logging)
-
-    // Coil
     implementation(libs.coil.compose)
-
-    // Icons
     implementation(libs.material.icons.extended)
+    implementation(libs.data.store)
 
 }

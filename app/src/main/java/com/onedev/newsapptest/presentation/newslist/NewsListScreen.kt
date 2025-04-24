@@ -1,5 +1,6 @@
 package com.onedev.newsapptest.presentation.newslist
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,10 +11,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
@@ -85,7 +90,9 @@ fun NewsListScreen(
                     .weight(1f)
                     .height(55.dp),
                 value = search,
-                onValueChange = { viewModel.onSearchTextChange(it) },
+                onValueChange = {
+                    viewModel.onSearchTextChange(it)
+                },
                 placeholder = { Text("Search") },
                 shape = RoundedCornerShape(24.dp),
                 singleLine = true,
@@ -111,6 +118,39 @@ fun NewsListScreen(
             }
         }
 
+        if (search.isBlank() && viewModel.recentSearches.isNotEmpty()) {
+            Text(
+                text = "Recently Search",
+                color = Color.Gray,
+                style = MaterialTheme.typography.titleSmall
+            )
+            Spacer(Modifier.height(8.dp))
+            LazyVerticalStaggeredGrid(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 150.dp),
+                columns = StaggeredGridCells.Adaptive(minSize = 100.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalItemSpacing = 8.dp
+            ) {
+                items(viewModel.recentSearches) { item ->
+                    Text(
+                        text = item,
+                        modifier = Modifier
+                            .clickable {
+                                viewModel.onSearchTextChange(item)
+                                viewModel.loadNews(search = item)
+                                viewModel.saveSearch(item)
+                            }
+                            .background(Color(0xFFE0E0E0), RoundedCornerShape(16.dp))
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
         when {
             isLoading -> {
                 Box(
@@ -169,6 +209,9 @@ fun NewsListScreen(
             .debounce(800)
             .distinctUntilChanged()
             .collectLatest { query ->
+                if (query.isNotEmpty()) {
+                    viewModel.saveSearch(query)
+                }
                 when (viewModel.typeNews) {
                     "Article" -> {
                         if (viewModel.article.isEmpty() || query.isNotEmpty()) {

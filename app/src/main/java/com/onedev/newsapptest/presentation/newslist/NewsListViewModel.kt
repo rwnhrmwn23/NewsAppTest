@@ -1,5 +1,6 @@
 package com.onedev.newsapptest.presentation.newslist
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,17 +11,21 @@ import com.onedev.newsapptest.domain.usecase.GetArticleUseCase
 import com.onedev.newsapptest.domain.usecase.GetBlogUseCase
 import com.onedev.newsapptest.domain.usecase.GetNewsSiteUseCase
 import com.onedev.newsapptest.domain.usecase.GetReportUseCase
+import com.onedev.newsapptest.utils.RecentSearchManager
 import com.onedev.newsapptest.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ArticleListViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val getArticlesUseCase: GetArticleUseCase,
     private val getBlogUseCase: GetBlogUseCase,
     private val getReportUseCase: GetReportUseCase,
-    private val getNewsSiteUseCase: GetNewsSiteUseCase,
+    private val getNewsSiteUseCase: GetNewsSiteUseCase
 ) : ViewModel() {
 
     var article by mutableStateOf<List<News>>(emptyList())
@@ -52,9 +57,27 @@ class ArticleListViewModel @Inject constructor(
 
     private var lastQuery: String? = null
 
+    var recentSearches by mutableStateOf<List<String>>(emptyList())
+        private set
+
+    fun saveSearch(query: String) {
+        viewModelScope.launch {
+            RecentSearchManager.saveSearch(context, query)
+        }
+    }
+
+    private fun loadRecentSearches() {
+        viewModelScope.launch {
+            RecentSearchManager.getSearches(context).collectLatest {
+                recentSearches = it
+            }
+        }
+    }
+
     init {
         loadNews()
         loadNewsSites()
+        loadRecentSearches()
     }
 
     fun loadNews(search: String? = null, newsSite: String? = null) {
