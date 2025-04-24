@@ -10,8 +10,8 @@ data class News(
     val imageUrl: String?,
     val publishedAt: String,
     val summary: String,
-    val launches: List<Launch>,
-    val events: List<Event>
+    val launches: List<Launch>? = null,
+    val events: List<Event>? = null
 ) : Parcelable {
     @Parcelize
     data class Launch(val launchId: String, val provider: String) : Parcelable

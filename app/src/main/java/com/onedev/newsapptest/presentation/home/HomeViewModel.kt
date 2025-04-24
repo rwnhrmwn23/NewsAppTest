@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import com.onedev.newsapptest.domain.model.News
 import com.onedev.newsapptest.domain.usecase.GetArticleUseCase
 import com.onedev.newsapptest.domain.usecase.GetBlogUseCase
+import com.onedev.newsapptest.domain.usecase.GetReportUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -16,6 +17,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val getArticlesUseCase: GetArticleUseCase,
     private val getBlogUseCase: GetBlogUseCase,
+    private val getReportUseCase: GetReportUseCase,
 ) : ViewModel() {
 
     var news by mutableStateOf<List<News>>(emptyList())
@@ -30,9 +32,16 @@ class HomeViewModel @Inject constructor(
     var isLoadingBlog by mutableStateOf(true)
         private set
 
+    var reports by mutableStateOf<List<News>>(emptyList())
+        private set
+
+    var isLoadingReport by mutableStateOf(true)
+        private set
+
     init {
         loadArticles()
         loadBlogs()
+        loadReports()
     }
 
     private fun loadArticles(search: String? = null) {
@@ -53,6 +62,17 @@ class HomeViewModel @Inject constructor(
                 blogs = getBlogUseCase(search = search)
             } finally {
                 isLoadingBlog = false
+            }
+        }
+    }
+
+    private fun loadReports(search: String? = null) {
+        viewModelScope.launch {
+            try {
+                isLoadingReport = true
+                reports = getReportUseCase(search = search)
+            } finally {
+                isLoadingReport = false
             }
         }
     }

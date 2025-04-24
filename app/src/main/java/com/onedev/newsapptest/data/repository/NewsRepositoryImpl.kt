@@ -34,4 +34,16 @@ class NewsRepositoryImpl(
             )
         }
     }
+
+    override suspend fun getReport(search: String?): List<News> {
+        return api.getReports(search = search).results.map {
+            News(
+                id = it.id,
+                title = it.title,
+                imageUrl = it.imageUrl,
+                summary = it.summary,
+                publishedAt = it.publishedAt
+            )
+        }
+    }
 }

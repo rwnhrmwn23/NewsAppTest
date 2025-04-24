@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.onedev.newsapptest.domain.model.News
 import com.onedev.newsapptest.domain.usecase.GetArticleUseCase
 import com.onedev.newsapptest.domain.usecase.GetBlogUseCase
+import com.onedev.newsapptest.domain.usecase.GetReportUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -15,13 +16,17 @@ import javax.inject.Inject
 @HiltViewModel
 class ArticleListViewModel @Inject constructor(
     private val getArticlesUseCase: GetArticleUseCase,
-    private val getBlogUseCase: GetBlogUseCase
+    private val getBlogUseCase: GetBlogUseCase,
+    private val getReportUseCase: GetReportUseCase
 ) : ViewModel() {
 
     var article by mutableStateOf<List<News>>(emptyList())
         private set
 
     var blogs by mutableStateOf<List<News>>(emptyList())
+        private set
+
+    var reports by mutableStateOf<List<News>>(emptyList())
         private set
 
     var isLoading by mutableStateOf(true)
@@ -43,25 +48,37 @@ class ArticleListViewModel @Inject constructor(
     private var lastQuery: String? = null
 
     fun loadNews(search: String? = null) {
-        if (typeNews == "Article") {
-            if (search == lastQuery && article.isNotEmpty()) return
-            lastQuery = search
+        when (typeNews) {
+            "Article" -> {
+                if (search == lastQuery && article.isNotEmpty()) return
+                lastQuery = search
 
-            viewModelScope.launch {
-                isLoading = true
-                article = getArticlesUseCase(search)
-                isLoading = false
+                viewModelScope.launch {
+                    isLoading = true
+                    article = getArticlesUseCase(search)
+                    isLoading = false
+                }
             }
-        } else {
-            if (search == lastQuery && blogs.isNotEmpty()) return
-            lastQuery = search
+            "Blog" -> {
+                if (search == lastQuery && blogs.isNotEmpty()) return
+                lastQuery = search
 
-            viewModelScope.launch {
-                isLoading = true
-                blogs = getBlogUseCase(search)
-                isLoading = false
+                viewModelScope.launch {
+                    isLoading = true
+                    blogs = getBlogUseCase(search)
+                    isLoading = false
+                }
+            }
+            else -> {
+                if (search == lastQuery && reports.isNotEmpty()) return
+                lastQuery = search
+
+                viewModelScope.launch {
+                    isLoading = true
+                    reports = getReportUseCase(search)
+                    isLoading = false
+                }
             }
         }
-
     }
 }

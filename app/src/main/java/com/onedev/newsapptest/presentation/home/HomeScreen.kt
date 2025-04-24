@@ -41,6 +41,8 @@ fun HomeScreen(
     val isLoadingArticle = viewModel.isLoadingArticle
     val blogs = viewModel.blogs
     val isLoadingBlog = viewModel.isLoadingBlog
+    val reports = viewModel.reports
+    val isLoadingReport = viewModel.isLoadingReport
 
     Column(
         modifier = Modifier
@@ -102,6 +104,28 @@ fun HomeScreen(
                 items(blogs) { blogs ->
                     NewsItem(news = blogs, onClick = {
                         onClick(blogs, "Blog")
+                    })
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        SectionRow(title = "Report", onSeeMore = {
+            navController.navigate(Screen.ArticleList.createRoute("Report"))
+        })
+
+        if (isLoadingReport) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(48.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+        } else {
+            Spacer(modifier = Modifier.height(16.dp))
+            LazyRow {
+                items(reports) { report ->
+                    NewsItem(news = report, onClick = {
+                        onClick(report, "Report")
                     })
                 }
             }

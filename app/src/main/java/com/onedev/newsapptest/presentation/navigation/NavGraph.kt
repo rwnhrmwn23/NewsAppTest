@@ -21,7 +21,7 @@ fun AppNavGraph(navController: NavHostController) {
         composable(route = Screen.Home.route) {
             HomeScreen(
                 greeting = getGreeting(),
-                userName = "One",
+                userName = "Irwan",
                 navController = navController,
                 onClick = { news: News, type: String ->
                     navController.currentBackStackEntry?.savedStateHandle?.set("type", type)

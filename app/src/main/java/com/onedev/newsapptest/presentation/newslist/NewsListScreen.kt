@@ -2,6 +2,7 @@ package com.onedev.newsapptest.presentation.newslist
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -55,6 +56,7 @@ fun NewsListScreen(
     val search by remember { derivedStateOf { viewModel.searchText } }
     val articles by remember { derivedStateOf { viewModel.article } }
     val blogs by remember { derivedStateOf { viewModel.blogs } }
+    val reports by remember { derivedStateOf { viewModel.reports } }
     val isLoading by remember { derivedStateOf { viewModel.isLoading } }
 
     viewModel.typeNews = title
@@ -102,22 +104,51 @@ fun NewsListScreen(
         }
 
         if (isLoading) {
-            CircularProgressIndicator(
+            Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(48.dp),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         } else {
-            if (viewModel.typeNews == "Article") {
-                LazyColumn {
-                    items(articles) { article ->
-                        NewsListItem(news = article, onClick = { onClickNews(article) })
+            when (viewModel.typeNews) {
+                "Article" -> {
+                    if (articles.isEmpty()) {
+                        EmptyStateMessage(viewModel.typeNews)
+                    } else {
+                        LazyColumn {
+                            items(articles) { article ->
+                                NewsListItem(news = article, onClick = { onClickNews(article) })
+                            }
+                        }
                     }
                 }
-            } else {
-                LazyColumn {
-                    items(blogs) { blog ->
-                        NewsListItem(news = blog, onClick = { onClickNews(blog) })
+
+                "Blog" -> {
+                    if (blogs.isEmpty()) {
+                        EmptyStateMessage(viewModel.typeNews)
+                    } else {
+                        LazyColumn {
+                            items(blogs) { blog ->
+                                NewsListItem(news = blog, onClick = { onClickNews(blog) })
+                            }
+                        }
+                    }
+                }
+
+                else -> {
+                    if (reports.isEmpty()) {
+                        EmptyStateMessage(viewModel.typeNews)
+                    } else {
+                        LazyColumn {
+                            items(reports) { report ->
+                                NewsListItem(news = report, onClick = { onClickNews(report) })
+                            }
+                        }
                     }
                 }
             }
@@ -129,16 +160,41 @@ fun NewsListScreen(
             .debounce(800)
             .distinctUntilChanged()
             .collectLatest { query ->
-                if (viewModel.typeNews == "Article") {
-                    if (viewModel.article.isEmpty() || query.isNotEmpty()) {
-                        viewModel.loadNews(search = query)
+                when (viewModel.typeNews) {
+                    "Article" -> {
+                        if (viewModel.article.isEmpty() || query.isNotEmpty()) {
+                            viewModel.loadNews(search = query)
+                        }
                     }
-                } else {
-                    if (viewModel.blogs.isEmpty() || query.isNotEmpty()) {
-                        viewModel.loadNews(search = query)
+
+                    "Blog" -> {
+                        if (viewModel.blogs.isEmpty() || query.isNotEmpty()) {
+                            viewModel.loadNews(search = query)
+                        }
+                    }
+
+                    else -> {
+                        if (viewModel.reports.isEmpty() || query.isNotEmpty()) {
+                            viewModel.loadNews(search = query)
+                        }
                     }
                 }
             }
+    }
+}
+
+@Composable
+fun EmptyStateMessage(type: String) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "No $type Found",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
+        )
     }
 }
 
@@ -176,7 +232,7 @@ fun NewsListItem(news: News, onClick: () -> Unit) {
             ) {
                 Column {
                     Text("Launches", style = MaterialTheme.typography.bodySmall)
-                    if (news.launches.isEmpty()) {
+                    if (news.launches.isNullOrEmpty()) {
                         Text("-", style = MaterialTheme.typography.bodySmall)
                     } else {
                         news.launches.forEach {
@@ -188,7 +244,7 @@ fun NewsListItem(news: News, onClick: () -> Unit) {
                 }
                 Column {
                     Text("Event", style = MaterialTheme.typography.bodySmall)
-                    if (news.events.isEmpty()) {
+                    if (news.events.isNullOrEmpty()) {
                         Text("-", style = MaterialTheme.typography.bodySmall)
                     } else {
                         news.events.forEach {
