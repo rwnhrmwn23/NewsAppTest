@@ -25,13 +25,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.onedev.newsapptest.domain.model.Article
-import com.onedev.newsapptest.utils.getGreeting
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel(),
-    userName: String = "User Name",
-    greeting: String = getGreeting()
+    greeting: String,
+    userName: String,
+    onArticleClick: (Article) -> Unit,
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val articles = viewModel.articles
     val isLoading = viewModel.isLoading
@@ -64,7 +64,9 @@ fun HomeScreen(
         } else {
             LazyRow {
                 items(articles) { article ->
-                    ArticleItem(article = article)
+                    ArticleItem(article = article, onClick = {
+                        onArticleClick(article)
+                    })
                 }
             }
         }
@@ -87,12 +89,12 @@ fun SectionRow(title: String, onSeeMore: () -> Unit) {
 }
 
 @Composable
-fun ArticleItem(article: Article) {
+fun ArticleItem(article: Article, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .padding(end = 8.dp)
             .size(140.dp)
-            .clickable { /* navigate to detail */ }
+            .clickable { onClick() }
     ) {
         Column {
             AsyncImage(
@@ -111,14 +113,4 @@ fun ArticleItem(article: Article) {
             )
         }
     }
-}
-
-
-
-@Preview
-@Composable
-fun HomeScreenPreview() {
-    HomeScreen(
-        userName = "One",
-    )
 }

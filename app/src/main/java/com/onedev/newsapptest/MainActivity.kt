@@ -3,7 +3,8 @@ package com.onedev.newsapptest
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.onedev.newsapptest.presentation.home.HomeScreen
+import androidx.navigation.compose.rememberNavController
+import com.onedev.newsapptest.presentation.navigation.AppNavGraph
 import com.onedev.newsapptest.ui.theme.NewsAppTestTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -15,9 +16,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             NewsAppTestTheme {
-                HomeScreen(
-                    userName = "One",
-                )
+                val navController = rememberNavController()
+                AppNavGraph(navController = navController)
             }
         }
     }

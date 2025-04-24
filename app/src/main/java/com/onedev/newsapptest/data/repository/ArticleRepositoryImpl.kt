@@ -12,8 +12,9 @@ class ArticleRepositoryImpl(
             Article(
                 id = it.id,
                 title = it.title,
-                imageUrl = it.image_url,
-                publishedAt = it.published_at
+                imageUrl = it.imageUrl,
+                summary = it.summary,
+                publishedAt = it.publishedAt
             )
         }
     }
