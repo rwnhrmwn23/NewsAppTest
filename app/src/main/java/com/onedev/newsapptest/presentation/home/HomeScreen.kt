@@ -61,7 +61,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
-                .padding(16.dp)
+                .padding(vertical = 16.dp),
         ) {
             Column(
                 modifier = Modifier
@@ -150,7 +150,7 @@ fun HomeScreen(
 @Composable
 fun SectionRow(title: String, onSeeMore: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = title, style = MaterialTheme.typography.titleMedium)
@@ -166,7 +166,7 @@ fun SectionRow(title: String, onSeeMore: () -> Unit) {
 fun NewsItem(news: News, onClick: () -> Unit) {
     Card(
         modifier = Modifier
-            .padding(end = 8.dp)
+            .padding(horizontal = 8.dp)
             .size(140.dp)
             .clickable { onClick() }
     ) {

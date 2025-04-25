@@ -80,5 +80,5 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.material.icons.extended)
     implementation(libs.data.store)
-
+    implementation(libs.androidx.work)
 }
